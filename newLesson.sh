@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # verifica che sia stato specificato almeno un parametro
-if [ $# -lt 1 ]; then
+if [ $# -ne 2 ]; then
   echo "Usage: $0 <nome_cartella> <num_esercizi>"
   exit 1
 fi
@@ -30,21 +30,28 @@ if [ $# -gt 1 ]; then
   for ((i=1; i<=num_esercizi; i++)); do
     es_dir="Esercizi/es$i"
     mkdir -p "$es_dir"/{bin,src,obj}
-    touch "$es_dir"/src/"es$i.c"
+    srcpath="$es_dir"/src/"es$i.c"
+    echo "#include <stdio.h>" >> "$srcpath"
+    echo "" >> "$srcpath"
+    echo "int main(int argc, char* argv[]){" >> "$srcpath"
+    echo "    " >> "$srcpath"
+    echo "    " >> "$srcpath"
+    echo "    return 0;" >> "$srcpath"
+    echo "}" >> "$srcpath"
     
     # crea il makefile nella cartella principale
     makefile="$es_dir"/Makefile
     touch "$makefile"
-    echo "NAME=es$i" >> "$makefile"
-    echo "CFLAGS=-Wall -Werror" >> "$makefile"
-    echo "" >> "$makefile"
-    echo "all: obj/es$i.o" >> "$makefile"
-    echo "" >> "$makefile"
-    echo "obj/es$i.o: src/es$i.c" >> "$makefile"
-    echo -e "\t\$(CC) \$(CFLAGS) -c src/es$i.c -o obj/es$i.o" >> "$makefile"
-    echo "" >> "$makefile"
-    echo ".PHONY: clean" >> "$makefile"
-    echo "clean:" >> "$makefile"
-    echo -e "\trm -f obj/es$i.o bin/es$i" >> "$makefile"
+    # echo "NAME=es$i" >> "$makefile"
+    # echo "CFLAGS=-Wall -Werror" >> "$makefile"
+    # echo "" >> "$makefile"
+    # echo "all: obj/es$i.o" >> "$makefile"
+    # echo "" >> "$makefile"
+    # echo "obj/es$i.o: src/es$i.c" >> "$makefile"
+    # echo -e "\t\$(CC) \$(CFLAGS) -c src/es$i.c -o obj/es$i.o" >> "$makefile"
+    # echo "" >> "$makefile"
+    # echo ".PHONY: clean" >> "$makefile"
+    # echo "clean:" >> "$makefile"
+    # echo -e "\trm -f obj/es$i.o bin/es$i" >> "$makefile"
   done
 fi
