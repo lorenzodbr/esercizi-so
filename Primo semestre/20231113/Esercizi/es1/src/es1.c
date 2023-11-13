@@ -10,8 +10,8 @@
 extern char **environ;
 
 void getEnviron(char *, char *);
-int startsWith(char *start, char *str);
-int isSubDir(char *sub, char *dir);
+int startsWith(char *, char *);
+int isSubDir(char *, char *);
 
 int main(int argc, char* argv[]){
     char *user, *home_dir, *working_dir;
@@ -36,7 +36,7 @@ int main(int argc, char* argv[]){
         printf("Caro %s, sono già nel posto giusto!\n", user);
     } else {
         chdir(home_dir);
-        int fd = open("./nuovo_file.txt", O_CREAT | O_RDONLY);
+        int fd = open("./nuovo_file.txt", O_CREAT);
         printf("Caro %s, sono dentro la tua home!\n", user);
     }
 
