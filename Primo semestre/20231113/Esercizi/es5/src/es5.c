@@ -29,6 +29,10 @@ int main(int argc, char* argv[]){
         int stdout_fd = open("stdout.txt", O_CREAT | O_WRONLY | O_TRUNC, S_IRUSR | S_IWUSR);
         int stderr_fd = open("stderr.txt", O_CREAT | O_WRONLY | O_TRUNC, S_IRUSR | S_IWUSR);
 
+        if(stdout_fd == -1 || stderr_fd == -1){
+            return -1;
+        }
+
         close(STDOUT_FILENO);
         dup(stdout_fd);
         close(STDERR_FILENO);

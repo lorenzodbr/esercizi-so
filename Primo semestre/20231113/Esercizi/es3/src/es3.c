@@ -21,6 +21,8 @@ int main(int argc, char* argv[]){
         pid = fork();
         if(pid > 0){
             n--;
+        } else if(pid == -1){
+            return -1;
         } else {
             pid = getpid();
             ppid = getppid();

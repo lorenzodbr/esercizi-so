@@ -30,7 +30,7 @@ int main(int argc, char* argv[]){
     working_dir = malloc(sizeof(char)*PATH_MAX);
     getcwd(working_dir, PATH_MAX);
 
-    for(char **it = environ; (*it) != NULL && home_dir == NULL || user == NULL; it++){
+    for(char **it = environ; (*it) != NULL && (home_dir == NULL || user == NULL); it++){
         for(i = 0; *((*it) + i) != '='; i++);
 
         if(startsWith("HOME", *it)){

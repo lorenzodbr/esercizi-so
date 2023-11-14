@@ -25,5 +25,5 @@ int main(int argc, char * argv[]){
 
     execl(PATH, "es4_a", n, m, NULL);
     
-    return 0;
+    return -1;  //eseguita solo in caso di errore della exec
 }
