@@ -47,6 +47,7 @@ int main(int argc, char* argv[]){
     } else {
         chdir(home_dir);
         int fd = open("./nuovo_file.txt", O_CREAT);
+        close(fd);
         printf("Caro %s, sono dentro la tua home!\n", user);
     }
 
