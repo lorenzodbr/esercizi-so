@@ -5,6 +5,14 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 
+// Scrivere un programma che legge da riga di comando un intero positivo N.
+// Il programma successivamente crea N processi figlio. Ogni processo figlio, stampa a
+// video il suo PID, il PID del suo processo padre, ed infine termina con un codice di 
+// terminazione (un numero casuale tre 0 e 255). Dopo avere creato N processi figlio, il
+// programma attende la terminazione di ogni processo figlio. Ogni qualvolta un 
+// processo figlio termina, il programma stampa a video il codice di terminazione del 
+// figlio.
+
 int main(int argc, char* argv[]){
     int n, r, status;
     pid_t pid;
