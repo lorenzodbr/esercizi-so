@@ -5,6 +5,8 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 
+#define MAX_RAND 256
+
 // Scrivere un programma che legge da riga di comando un intero positivo N.
 // Il programma successivamente crea N processi figlio. Ogni processo figlio, stampa a
 // video il suo PID, il PID del suo processo padre, ed infine termina con un codice di 
@@ -33,7 +35,7 @@ int main(int argc, char* argv[]){
             ppid = getppid();
             srand(pid);
             printf("(F) Sono un figlio con pid = %d, mio padre ha pid = %d\n", pid, ppid);
-            exit(rand() % 256);
+            exit(rand() % MAX_RAND);
         }
     }
 

@@ -24,14 +24,14 @@ int isSubDir(char *, char *);
 // programma stampa a video: “Caro USER, sono gia’ nel posto giusto!”.
 
 int main(int argc, char* argv[]){
-    char *user, *home_dir, *working_dir;
+    char *user = NULL, *home_dir = NULL, *working_dir = NULL;
     int i;
     
-    working_dir = malloc(sizeof(char)*PATH_MAX);
+    working_dir = (char *) malloc(sizeof(char)*PATH_MAX);
     getcwd(working_dir, PATH_MAX);
 
     for(char **it = environ; (*it) != NULL && (home_dir == NULL || user == NULL); it++){
-        for(i = 0; *((*it) + i) != '='; i++);
+        for(i = 0; *((*it) + i) != '=' && *((*it) + i) != '\0'; i++);
 
         if(startsWith("HOME", *it)){
             home_dir = (*it) + strlen("HOME=");
@@ -40,6 +40,16 @@ int main(int argc, char* argv[]){
         if(startsWith("USER", *it)){
             user = (*it) + strlen("USER=");
         }
+    }
+
+    if(user == NULL){
+        printf("Non ho trovato l'username dell'utente!\n");
+        return -1;
+    }
+
+    if(home_dir == NULL){
+        printf("Non ho trovato la cartella home dell'utente!\n");
+        return -1;
     }
 
     if(isSubDir(home_dir, working_dir)){

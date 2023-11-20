@@ -5,6 +5,8 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 
+#define MAX_RAND 256
+
 // Modificare il programma dell’ “es2” affinche’ il processo parent attenda solo la 
 // terminazione dell’ultimo figlio creato. L’attesa deve avvenire in modalità polling!
 
@@ -28,7 +30,7 @@ int main(int argc, char* argv[]){
             ppid = getppid();
             srand(pid);
             printf("(F) Sono un figlio con pid = %d, mio padre ha pid = %d\n", pid, ppid);
-            exit(rand() % 256);
+            exit(rand() % MAX_RAND);
         }
     }
 
