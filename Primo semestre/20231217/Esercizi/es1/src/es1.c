@@ -11,43 +11,48 @@
 // essere responsabile della somma di una parte dell'array e il thread principale deve attendere che tutti i 
 // thread finiscano utilizzando pthread_join prima di stampare il risultato finale.
 
+//struttura per stabilire i limiti nei quali calcolare la somma
 typedef struct {
     int from;
     int to;
     int result;
 } bounds_t;
 
+//array di numeri da sommare
 int numbers[N] = {0};
 
 void *sum(void *);
 
 int main(int argc, char *argv[]){
-    int threadCount = 0, i;
-    int mainSum = 0, threadSum = 0;
-    int *threadResult;
-    int exitCode;
+    int threadCount = 0;                //numero di thread da generare
+    int i;                              //iteratore
+    int mainSum = 0, threadSum = 0;     //somme (monoprocesso e multithread)
+    int exitCode;                       //codice di uscita
 
-    pthread_t tid[N];
+    pthread_t tid[N];                   //array di tid per i thread
+    bounds_t bounds[N];                 //array di bounds per i thread
 
     printf("Inserimento nell'array:\n");
-    for(i = 0; i < N; i++){
+    for(i = 0; i < N; i++){             //inserimento dei numeri nell'array
         printf("numbers[%d] = ", i);
         scanf("%d", &numbers[i]);
         mainSum += numbers[i];
     }
 
     printf("Numero di thread: ");
-    scanf("%d", &threadCount);
+    scanf("%d", &threadCount);          //inserimento del numero di thread da generare
 
+    //calcolo della somma monoprocesso
     printf("Somma monothread: %d\n", mainSum);
-
-    bounds_t bounds[N];
-        
+    
+    //se il numero di thread è maggiore del numero di elementi dell'array
+    //è inutile generare più thread del numero di elementi dell'array
     if(threadCount > N){
         threadCount = N;
     }
 
     for(i = 0; i < threadCount; i++){
+        //calcolo dei bounds
         if(i > 0)
             bounds[i].from = bounds[i - 1].to + 1;
         else {
@@ -62,8 +67,10 @@ int main(int argc, char *argv[]){
             bounds[i].to = bounds[i].from + (N / threadCount) - 1;
         }
         
+        //creo il thread con la funzione sum e i bounds
         exitCode = pthread_create(&tid[i], NULL, sum, &bounds[i]);
 
+        //controllo la creazione del thread
         if(exitCode != 0){
             printf("Errore nella creazione del thread %d\n", i);
             exit(1);
@@ -71,14 +78,19 @@ int main(int argc, char *argv[]){
     }
 
     for(i = 0; i < threadCount; i++){
-        exitCode = pthread_join(tid[i], (void **) &threadResult);
+        //attendo la terminazione del thread
+        exitCode = pthread_join(tid[i], NULL);
 
+        //controllo la terminazione del thread
         if(exitCode != 0){
             printf("Errore nella join del thread %d\n", i);
             exit(1);
-        } else {
-            threadSum += bounds[i].result;
         }
+    }
+
+    //calcolo della somma multithread
+    for(i = 0; i < threadCount; i++){
+        threadSum += bounds[i].result;
     }
 
     printf("Somma multithread: %d\n", threadSum);
