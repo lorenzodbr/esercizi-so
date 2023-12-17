@@ -4,11 +4,10 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#define PATH_MAX 512
+#define MAX_PATH 512
 
 extern char **environ;
 
-void getEnviron(char *, char *);
 int startsWith(char *, char *);
 int isSubDir(char *, char *);
 
@@ -27,8 +26,8 @@ int main(int argc, char* argv[]){
     char *user = NULL, *home_dir = NULL, *working_dir = NULL;
     int i;
     
-    working_dir = (char *) malloc(sizeof(char)*PATH_MAX);
-    getcwd(working_dir, PATH_MAX);
+    working_dir = (char *) malloc(sizeof(char)*MAX_PATH);
+    getcwd(working_dir, MAX_PATH);
 
     for(char **it = environ; (*it) != NULL && (home_dir == NULL || user == NULL); it++){
         for(i = 0; *((*it) + i) != '=' && *((*it) + i) != '\0'; i++);
@@ -52,13 +51,24 @@ int main(int argc, char* argv[]){
         return -1;
     }
 
+    if(working_dir == NULL){
+        printf("Non ho trovato la cartella di lavoro dell'utente!\n");
+        return -1;
+    }
+
     if(isSubDir(home_dir, working_dir)){
         printf("Caro %s, sono già nel posto giusto!\n", user);
     } else {
         chdir(home_dir);
         int fd = open("./nuovo_file.txt", O_CREAT);
-        close(fd);
-        printf("Caro %s, sono dentro la tua home!\n", user);
+
+        if(fd != -1){
+            close(fd);
+            printf("Caro %s, sono dentro la tua home!\n", user);
+        } else {
+            printf("Impossibile creare il file nella cartella home!\n");
+            return -1;
+        }
     }
 
     return 0;

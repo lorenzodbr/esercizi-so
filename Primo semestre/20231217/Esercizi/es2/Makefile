@@ -1,8 +1,8 @@
 CC = gcc
-CFLAGS = -Wall -pedantic -std=c99
-SRC = src/es1.c
-OBJ = obj/es1.o
-BIN = bin/es1
+CFLAGS = -Wall -pedantic -std=c99 -lpthread
+SRC = src/es2.c
+OBJ = obj/es2.o
+BIN = bin/es2
 
 all: $(BIN)
 
