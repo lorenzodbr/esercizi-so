@@ -87,7 +87,7 @@ void *fatt(void *arg){
     for(int i = bounds->from; i <= bounds->to; i++){
         fatt *= i;
     }
-    
+
     bounds->result = fatt;
 
     pthread_exit(NULL);
