@@ -67,6 +67,16 @@ int main(int argc, char *argv[]){
     printf("Numero di processi: ");         
     scanf("%d", &processCount);                     //inserimento del numero di processi da generare
 
+    if(processCount <= 0){
+        printf("Numero di processi non valido! Imposto al valore di default 1\n");
+        processCount = 1;
+    }
+
+    if(processCount > N){
+        printf("Numero di processi maggiore del numero di elementi dell'array! Imposto al valore di default %d\n", N);
+        processCount = N;
+    }
+
     startClock();
 
     for(i = 0; i < N; i++){
