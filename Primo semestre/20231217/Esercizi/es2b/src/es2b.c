@@ -7,8 +7,10 @@
 #include <sys/ipc.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <time.h>
+#include <sys/time.h>
 
-#define PROCESS_COUNT 8
+#define PROCESS_COUNT 4
 
 //Svolgere lo stesso esercizio utilizzando memoria condivisa e processi, e non più le pthreads come 
 //nel primo caso.
@@ -20,25 +22,34 @@ typedef struct {
 } bounds_t;
 
 //Struttura per la memoria condivisa
-struct shared {
+typedef struct {
     int partialFattorials[PROCESS_COUNT];
-};
+} shared;
 
 int fatt(bounds_t);
 long fattMono(int);
-bounds_t *getBounds(int);
+bounds_t *getBounds(int, int);
+void startClock();
+void endClock();
+
+clock_t begin = 0, end = 0;         //variabili per il calcolo del tempo
+int clocksSpent;                    //tempo impiegato per i calcoli
+
+struct timeval t1, t2;              //variabili per il calcolo del tempo
+int timeSpent;                      //tempo impiegato per i calcoli
 
 int main(int argc, char *argv[]){
     int n;                          //numero di cui calcolare il fattoriale
     int i;                          //iteratore
-    long processFatt = 1;           //fattoriale calcolato dai processi
+    long long processFatt = 1;      //fattoriale calcolato dai processi
+    long long mainFatt;             //fattoriale calcolato dal main
     int exitCode;                   //codice di uscita
 
     pid_t pid[PROCESS_COUNT];       //array di pid per i processi
     bounds_t *bounds;               //array di bounds per i processi
 
     //creazione della memoria condivisa
-    int shmId = shmget(IPC_PRIVATE, sizeof(struct shared), IPC_CREAT | S_IRUSR | S_IWUSR);
+    int shmId = shmget(IPC_PRIVATE, sizeof(shared), IPC_CREAT | S_IRUSR | S_IWUSR);
     
     //controllo della creazione della memoria condivisa
     if (shmId == -1){
@@ -50,11 +61,15 @@ int main(int argc, char *argv[]){
     printf("Numero di cui calcolare il fattoriale: ");
     scanf("%d", &n);
 
+    startClock();
+    mainFatt = fattMono(n);
+    endClock();
+
     //calcolo del fattoriale monoprocesso
-    printf("Fattoriale monoprocesso: %ld\n", fattMono(n));
+    printf("Fattoriale monoprocesso: %lld in %d clock e %d usec\n", mainFatt, clocksSpent, timeSpent);
 
     //attacco la memoria condivisa al processo
-    struct shared *sharedMemoryPointer = shmat(shmId, 0, 0);
+    shared *sharedMemoryPointer = shmat(shmId, 0, 0);
 
     //controllo dell'attacco della memoria condivisa
     if (sharedMemoryPointer == (void *) -1){
@@ -62,12 +77,14 @@ int main(int argc, char *argv[]){
         exit(1);
     }
 
-    bounds = getBounds(n);
+    bounds = getBounds(1, n);
 
     if(!bounds){
         printf("Errore nell'allocazione della memoria!\n");
         exit(1);
     }
+
+    startClock();
 
     //creazione dei processi
     for(i = 0; i < n && i < PROCESS_COUNT; i++){
@@ -94,6 +111,8 @@ int main(int argc, char *argv[]){
         processFatt *= sharedMemoryPointer->partialFattorials[i];
     }
 
+    endClock();
+
     //stacco la memoria condivisa dal processo
     if (shmdt(sharedMemoryPointer) == -1){
         printf("Unlink shared memory fallito!\n");
@@ -101,7 +120,7 @@ int main(int argc, char *argv[]){
     }
 
     //stampa del fattoriale multiprocesso
-    printf("Fattoriale multiprocesso: %ld\n", processFatt);
+    printf("Fattoriale multiprocesso: %lld in %d clock e %d usec\n", processFatt, clocksSpent, timeSpent);
 
     return 0;
 }
@@ -126,30 +145,33 @@ long fattMono(int n){
     return fatt;
 }
 
-bounds_t * getBounds(int howMany){
+bounds_t * getBounds(int start, int n){
+    int howMany = n < PROCESS_COUNT ? n : PROCESS_COUNT;
+
     bounds_t *bounds = (bounds_t *) malloc(howMany * sizeof(bounds_t));
 
-    if(!bounds) return NULL;
+    if(bounds){
+        int i;
+        int elementsPerThread = n / howMany;
+        int remainder = n % howMany;
 
-    int i;
-    for(i = 0; i < howMany; i++){
-        //calcolo dei bounds
-        if(i > 0){
-            bounds[i].from = bounds[i - 1].to + 1;
-        } else {
-            bounds[i].from = 1;
-        }
-
-        bounds[i].to = bounds[i].from + floor(howMany / PROCESS_COUNT);
-
-        if(howMany >= PROCESS_COUNT){
-            bounds[i].to -= 1;
-        }
-
-        if(i == PROCESS_COUNT - 1){
-            bounds[i].to = howMany;
+        for(i = 0; i < howMany; i++){
+            bounds[i].from = i == 0 ? start : bounds[i - 1].to + 1;
+            bounds[i].to = bounds[i].from - 1 + elementsPerThread + (remainder-- > 0 ? 1 : 0);
         }
     }
 
     return bounds;
+}
+
+void startClock(){
+    begin = clock();
+    gettimeofday(&t1, NULL);
+}
+
+void endClock(){
+    end = clock();
+    gettimeofday(&t2, NULL);
+    clocksSpent = end - begin;
+    timeSpent = (t2.tv_usec - t1.tv_usec);
 }

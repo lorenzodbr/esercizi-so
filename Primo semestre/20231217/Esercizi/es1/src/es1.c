@@ -3,6 +3,8 @@
 #include <math.h>
 #include <pthread.h>
 #include <sys/types.h>
+#include <time.h>
+#include <sys/time.h>
 
 #define N 10
 
@@ -22,21 +24,24 @@ typedef struct {
 int numbers[N] = {0};
 
 void *sum(void *);
-bounds_t *getBounds(int);
+bounds_t *getBounds(int, int);
 void startClock();
 void endClock();
 
-clock_t begin = 0, end = 0; //variabili per il calcolo del tempo
-int clocksSpent;            //tempo impiegato per i calcoli
+clock_t begin = 0, end = 0;             //variabili per il calcolo del tempo
+int clocksSpent;                        //tempo impiegato per i calcoli
+
+struct timeval t1, t2;                  //variabili per il calcolo del tempo
+int timeSpent;                       //tempo impiegato per i calcoli
 
 int main(int argc, char *argv[]){
     int threadCount = 0;                //numero di thread da generare
     int i;                              //iteratore
-    int mainSum = 0, threadSum = 0;     //somme (monoprocesso e multithread)
+    long mainSum = 0, threadSum = 0;    //somme (monoprocesso e multithread)
     int exitCode;                       //codice di uscita
 
     pthread_t tid[N];                   //array di tid per i thread
-    bounds_t *bounds;                 //array di bounds per i thread
+    bounds_t *bounds;                   //array di bounds per i thread
 
     printf("Inserimento nell'array:\n");
     for(i = 0; i < N; i++){             //inserimento dei numeri nell'array
@@ -56,16 +61,24 @@ int main(int argc, char *argv[]){
     endClock();
 
     //calcolo della somma monoprocesso
-    printf("Somma monothread: %d in %d clock\n", mainSum, clocksSpent);
+    printf("Somma monothread: %ld in %d clock e %d usec\n", mainSum, clocksSpent, timeSpent);
     
     //se il numero di thread è maggiore del numero di elementi dell'array
     //è inutile generare più thread del numero di elementi dell'array
     if(threadCount > N){
+        printf("Numero di thread maggiore del numero di elementi dell'array! Imposto al valore di default %d\n", N);
         threadCount = N;
     }
 
-    bounds = getBounds(threadCount);
+    if(threadCount <= 0){
+        printf("Numero di thread non valido! Imposto al valore di default 1\n");
+        threadCount = 1;
+    }
 
+    //creazione dei bounds per i thread
+    bounds = getBounds(0, threadCount);
+
+    //controllo della creazione dei bounds
     if(!bounds){
         printf("Errore nell'allocazione della memoria!\n");
         exit(1);
@@ -102,7 +115,7 @@ int main(int argc, char *argv[]){
 
     endClock();
 
-    printf("Somma multithread: %d in %d clock\n", threadSum, clocksSpent);
+    printf("Somma multithread: %ld in %d clock e %d usec\n", threadSum, clocksSpent, timeSpent);
 
     pthread_exit(NULL);
     return 0;
@@ -122,26 +135,17 @@ void *sum(void *arg){
     pthread_exit(NULL);
 }
 
-bounds_t * getBounds(int howMany){
+bounds_t * getBounds(int start, int howMany){
     bounds_t *bounds = (bounds_t *) malloc(howMany * sizeof(bounds_t));
 
-    if(!bounds) return NULL;
+    if(bounds){
+        int i;
+        int elementsPerThread = N / howMany;
+        int remainder = N % howMany;
 
-    int i;
-    for(i = 0; i < howMany; i++){
-        //calcolo dei bounds
-        if(i > 0)
-            bounds[i].from = bounds[i - 1].to + 1;
-        else {
-            bounds[i].from = 0;
-        }
-        
-        if(i == howMany - 1){
-            bounds[i].to = N - 1;
-        } else if(N - bounds[i].from > howMany - i){
-            bounds[i].to = bounds[i].from + (N - bounds[i].from) / (howMany - i);
-        } else {
-            bounds[i].to = bounds[i].from + (N / howMany) - 1;
+        for(i = 0; i < howMany; i++){
+            bounds[i].from = i == 0 ? start : bounds[i - 1].to + 1;
+            bounds[i].to = bounds[i].from - 1 + elementsPerThread + (remainder-- > 0 ? 1 : 0);
         }
     }
 
@@ -150,9 +154,12 @@ bounds_t * getBounds(int howMany){
 
 void startClock(){
     begin = clock();
+    gettimeofday(&t1, NULL);
 }
 
 void endClock(){
     end = clock();
+    gettimeofday(&t2, NULL);
     clocksSpent = end - begin;
+    timeSpent = (t2.tv_usec - t1.tv_usec);
 }
