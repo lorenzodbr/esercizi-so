@@ -28,6 +28,7 @@ struct shared {
 int numbers[N] = {0};
 
 int sum(bounds_t);
+bounds_t *getBounds(int);
 
 int main(int argc, char *argv[]){
     int processCount = 0;                           //numero di processi da generare
@@ -35,7 +36,7 @@ int main(int argc, char *argv[]){
     int mainSum = 0, processSum = 0, exitCode;      //somme
 
     pid_t pid[N];                                   //array di pid per i processi
-    bounds_t bounds[N];                             //array di bounds per i processi
+    bounds_t *bounds;                               //array di bounds per i processi
 
     //creazione della memoria condivisa
     int shmId = shmget(IPC_PRIVATE, sizeof(struct shared), IPC_CREAT | S_IRUSR | S_IWUSR);
@@ -71,23 +72,10 @@ int main(int argc, char *argv[]){
         exit(1);
     }
 
+    bounds = getBounds(processCount);
+
     //creazione dei processi
     for(i = 0; i < processCount; i++){
-        //calcolo dei bounds
-        if(i > 0)
-            bounds[i].from = bounds[i - 1].to + 1;
-        else {
-            bounds[i].from = 0;
-        }
-        
-        if(i == processCount - 1){
-            bounds[i].to = N - 1;
-        } else if(N - bounds[i].from > processCount - i){
-            bounds[i].to = bounds[i].from + (N - bounds[i].from) / (processCount - i);
-        } else {
-            bounds[i].to = bounds[i].from + (N / processCount) - 1;
-        }
-
         //creo un nuovo processo
         pid[i] = fork();
 
@@ -130,4 +118,30 @@ int sum(bounds_t bounds){
     }
 
     return sum;
+}
+
+bounds_t * getBounds(int howMany){
+    int i;
+    bounds_t *bounds = (bounds_t *) malloc(howMany * sizeof(bounds_t));
+
+    if(!bounds) return NULL;
+
+    for(i = 0; i < howMany; i++){
+        //calcolo dei bounds
+        if(i > 0)
+            bounds[i].from = bounds[i - 1].to + 1;
+        else {
+            bounds[i].from = 0;
+        }
+        
+        if(i == howMany - 1){
+            bounds[i].to = N - 1;
+        } else if(N - bounds[i].from > howMany - i){
+            bounds[i].to = bounds[i].from + (N - bounds[i].from) / (howMany - i);
+        } else {
+            bounds[i].to = bounds[i].from + (N / howMany) - 1;
+        }
+    }
+
+    return bounds;
 }

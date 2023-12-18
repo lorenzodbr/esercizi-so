@@ -26,6 +26,7 @@ struct shared {
 
 int fatt(bounds_t);
 long fattMono(int);
+bounds_t *getBounds(int);
 
 int main(int argc, char *argv[]){
     int n;                          //numero di cui calcolare il fattoriale
@@ -34,7 +35,7 @@ int main(int argc, char *argv[]){
     int exitCode;                   //codice di uscita
 
     pid_t pid[PROCESS_COUNT];       //array di pid per i processi
-    bounds_t bounds[PROCESS_COUNT]; //array di bounds per i processi
+    bounds_t *bounds;               //array di bounds per i processi
 
     //creazione della memoria condivisa
     int shmId = shmget(IPC_PRIVATE, sizeof(struct shared), IPC_CREAT | S_IRUSR | S_IWUSR);
@@ -61,25 +62,15 @@ int main(int argc, char *argv[]){
         exit(1);
     }
 
+    bounds = getBounds(n);
+
+    if(!bounds){
+        printf("Errore nell'allocazione della memoria!\n");
+        exit(1);
+    }
+
     //creazione dei processi
     for(i = 0; i < n && i < PROCESS_COUNT; i++){
-        //calcolo dei bounds
-        if(i > 0){
-            bounds[i].from = bounds[i - 1].to + 1;
-        } else {
-            bounds[i].from = 1;
-        }
-
-        bounds[i].to = bounds[i].from + floor(n / PROCESS_COUNT);
-
-        if(n >= PROCESS_COUNT){
-            bounds[i].to -= 1;
-        }
-
-        if(i == PROCESS_COUNT - 1){
-            bounds[i].to = n;
-        }
-
         //creo un nuovo processo
         pid[i] = fork();
 
@@ -133,4 +124,32 @@ long fattMono(int n){
     }
 
     return fatt;
+}
+
+bounds_t * getBounds(int howMany){
+    bounds_t *bounds = (bounds_t *) malloc(howMany * sizeof(bounds_t));
+
+    if(!bounds) return NULL;
+
+    int i;
+    for(i = 0; i < howMany; i++){
+        //calcolo dei bounds
+        if(i > 0){
+            bounds[i].from = bounds[i - 1].to + 1;
+        } else {
+            bounds[i].from = 1;
+        }
+
+        bounds[i].to = bounds[i].from + floor(howMany / PROCESS_COUNT);
+
+        if(howMany >= PROCESS_COUNT){
+            bounds[i].to -= 1;
+        }
+
+        if(i == PROCESS_COUNT - 1){
+            bounds[i].to = howMany;
+        }
+    }
+
+    return bounds;
 }

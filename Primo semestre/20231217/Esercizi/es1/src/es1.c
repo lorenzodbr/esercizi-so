@@ -22,6 +22,7 @@ typedef struct {
 int numbers[N] = {0};
 
 void *sum(void *);
+bounds_t *getBounds(int);
 
 int main(int argc, char *argv[]){
     int threadCount = 0;                //numero di thread da generare
@@ -30,7 +31,7 @@ int main(int argc, char *argv[]){
     int exitCode;                       //codice di uscita
 
     pthread_t tid[N];                   //array di tid per i thread
-    bounds_t bounds[N];                 //array di bounds per i thread
+    bounds_t *bounds;                 //array di bounds per i thread
 
     printf("Inserimento nell'array:\n");
     for(i = 0; i < N; i++){             //inserimento dei numeri nell'array
@@ -51,22 +52,14 @@ int main(int argc, char *argv[]){
         threadCount = N;
     }
 
+    bounds = getBounds(threadCount);
+
+    if(!bounds){
+        printf("Errore nell'allocazione della memoria!\n");
+        exit(1);
+    }
+
     for(i = 0; i < threadCount; i++){
-        //calcolo dei bounds
-        if(i > 0)
-            bounds[i].from = bounds[i - 1].to + 1;
-        else {
-            bounds[i].from = 0;
-        }
-        
-        if(i == threadCount - 1){
-            bounds[i].to = N - 1;
-        } else if(N - bounds[i].from > threadCount - i){
-            bounds[i].to = bounds[i].from + (N - bounds[i].from) / (threadCount - i);
-        } else {
-            bounds[i].to = bounds[i].from + (N / threadCount) - 1;
-        }
-        
         //creo il thread con la funzione sum e i bounds
         exitCode = pthread_create(&tid[i], NULL, sum, &bounds[i]);
 
@@ -111,4 +104,30 @@ void *sum(void *arg){
     bounds->result = sum;
 
     pthread_exit(NULL);
+}
+
+bounds_t * getBounds(int howMany){
+    bounds_t *bounds = (bounds_t *) malloc(howMany * sizeof(bounds_t));
+
+    if(!bounds) return NULL;
+
+    int i;
+    for(i = 0; i < howMany; i++){
+        //calcolo dei bounds
+        if(i > 0)
+            bounds[i].from = bounds[i - 1].to + 1;
+        else {
+            bounds[i].from = 0;
+        }
+        
+        if(i == howMany - 1){
+            bounds[i].to = N - 1;
+        } else if(N - bounds[i].from > howMany - i){
+            bounds[i].to = bounds[i].from + (N - bounds[i].from) / (howMany - i);
+        } else {
+            bounds[i].to = bounds[i].from + (N / howMany) - 1;
+        }
+    }
+
+    return bounds;
 }
