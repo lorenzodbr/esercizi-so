@@ -3,8 +3,9 @@
 #include <math.h>
 #include <pthread.h>
 #include <sys/types.h>
+#include <time.h>
 
-#define THREAD_COUNT 8
+#define THREAD_COUNT 3
 
 // Scrivere un programma C che calcoli il fattoriale di un dato numero in parallelo utilizzando pthread. Il 
 // programma deve prendere in input un numero intero e ogni thread deve essere responsabile del calcolo di 
@@ -15,17 +16,23 @@
 typedef struct {
     int from;
     int to;
-    int result;
+    long result;
 } bounds_t;
 
 void *fatt(void *);
 long fattMono(int);
 bounds_t *getBounds(int);
+void startClock();
+void endClock();
+
+clock_t begin = 0, end = 0; //variabili per il calcolo del tempo
+int clocksSpent;            //tempo impiegato per i calcoli
 
 int main(int argc, char *argv[]){
     int n;                  //numero di cui calcolare il fattoriale
     int i;                  //iteratore
     long threadFatt = 1;    //fattoriale calcolato dai thread
+    long mainFatt;          //fattoriale calcolato dal main
     int exitCode;           //codice di uscita
 
     pthread_t tid[THREAD_COUNT];    //array di tid per i thread
@@ -34,8 +41,14 @@ int main(int argc, char *argv[]){
     printf("Numero di cui calcolare il fattoriale: ");
     scanf("%d", &n);
 
+    startClock();
+    mainFatt = fattMono(n);     //calcolo del fattoriale monoprocesso
+    endClock();
+
     //calcolo del fattoriale monoprocesso
-    printf("Fattoriale monothread: %ld\n", fattMono(n));
+    printf("Fattoriale monothread: %ld in %d clock\n", mainFatt, clocksSpent);
+
+    //----- THREADS -----
 
     //creazione dei bounds per i thread
     bounds_t *bounds = getBounds(n);
@@ -44,6 +57,8 @@ int main(int argc, char *argv[]){
         printf("Errore nell'allocazione della memoria!\n");
         exit(1);
     }
+
+    startClock();
 
     for(i = 0; i < n && i < THREAD_COUNT; i++){
         //creo il thread con la funzione fatt e i bounds
@@ -71,7 +86,9 @@ int main(int argc, char *argv[]){
         threadFatt *= bounds[i].result;
     }
 
-    printf("Fattoriale multithread: %ld\n", threadFatt);
+    endClock();
+
+    printf("Fattoriale multithread: %ld in %d clock\n", threadFatt, clocksSpent);
 
     pthread_exit(NULL);
     return 0;
@@ -129,4 +146,13 @@ bounds_t * getBounds(int howMany){
     }
 
     return bounds;
+}
+
+void startClock(){
+    begin = clock();
+}
+
+void endClock(){
+    end = clock();
+    clocksSpent = end - begin;
 }

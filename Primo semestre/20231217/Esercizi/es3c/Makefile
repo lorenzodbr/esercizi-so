@@ -1,8 +1,8 @@
 CC = gcc
 CFLAGS = -Wall -pedantic -std=c99
-SRC = src/es3.c
-OBJ = obj/es3.o
-BIN = bin/es3
+SRC = src/es3c.c
+OBJ = obj/es3c.o
+BIN = bin/es3c
 
 all: $(BIN)
 

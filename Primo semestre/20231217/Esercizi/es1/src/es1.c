@@ -23,6 +23,11 @@ int numbers[N] = {0};
 
 void *sum(void *);
 bounds_t *getBounds(int);
+void startClock();
+void endClock();
+
+clock_t begin = 0, end = 0; //variabili per il calcolo del tempo
+int clocksSpent;            //tempo impiegato per i calcoli
 
 int main(int argc, char *argv[]){
     int threadCount = 0;                //numero di thread da generare
@@ -37,14 +42,21 @@ int main(int argc, char *argv[]){
     for(i = 0; i < N; i++){             //inserimento dei numeri nell'array
         printf("numbers[%d] = ", i);
         scanf("%d", &numbers[i]);
-        mainSum += numbers[i];
     }
 
     printf("Numero di thread: ");
     scanf("%d", &threadCount);          //inserimento del numero di thread da generare
 
+    startClock();
+
+    for(i = 0; i < N; i++){
+        mainSum += numbers[i];
+    }
+
+    endClock();
+
     //calcolo della somma monoprocesso
-    printf("Somma monothread: %d\n", mainSum);
+    printf("Somma monothread: %d in %d clock\n", mainSum, clocksSpent);
     
     //se il numero di thread è maggiore del numero di elementi dell'array
     //è inutile generare più thread del numero di elementi dell'array
@@ -58,6 +70,8 @@ int main(int argc, char *argv[]){
         printf("Errore nell'allocazione della memoria!\n");
         exit(1);
     }
+
+    startClock();
 
     for(i = 0; i < threadCount; i++){
         //creo il thread con la funzione sum e i bounds
@@ -86,7 +100,9 @@ int main(int argc, char *argv[]){
         threadSum += bounds[i].result;
     }
 
-    printf("Somma multithread: %d\n", threadSum);
+    endClock();
+
+    printf("Somma multithread: %d in %d clock\n", threadSum, clocksSpent);
 
     pthread_exit(NULL);
     return 0;
@@ -130,4 +146,13 @@ bounds_t * getBounds(int howMany){
     }
 
     return bounds;
+}
+
+void startClock(){
+    begin = clock();
+}
+
+void endClock(){
+    end = clock();
+    clocksSpent = end - begin;
 }

@@ -2,9 +2,8 @@
 #include <stdlib.h>
 
 //Scrivere un programma C per calcolare la sequenza di Fibonacci, nelle seguenti varianti: 
-//1. in modo iterativo senza utilizzare processi o thread. 
-//   Il programma deve prendere in input 'n' e stampare i 
-//   primi 'n' numeri di Fibonacci
+//2. utilizzando processi e memoria condivisa. Il programma deve prendere
+//   in input 'n' e stampare i primi 'n' numeri di Fibonacci;
 
 int fibonacci(int);
 
