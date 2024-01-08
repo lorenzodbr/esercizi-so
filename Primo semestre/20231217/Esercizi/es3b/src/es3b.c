@@ -91,6 +91,10 @@ int main(int argc, char *argv[])
         waitpid(pids[i], NULL, 0);
     }
 
+    shmdt(result);
+    shmctl(shm_id, IPC_RMID, NULL);
+    semctl(sem_id, 0, IPC_RMID);
+
     printf("La sequenza di Fibonacci di lunghezza %d è:\n", seqLength);
 
     for (int i = 0; i < seqLength; i++)
@@ -99,6 +103,8 @@ int main(int argc, char *argv[])
     }
 
     printf("\n");
+
+    free(data);
 
     return 0;
 }
