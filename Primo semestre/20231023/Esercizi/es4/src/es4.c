@@ -63,13 +63,14 @@ int overwrite(const char *source_file, const char *destination_file){
 int append(const char *source_file, const char *destination_file){
     int fdIn, fdOut;
 
-    fdOut = open(destination_file, O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR);
-
     if(access(destination_file, F_OK) != 0){
         printf("Il file %s non esiste!\n", destination_file);
+        
         return -1;
     } else {
+        fdOut = open(destination_file, O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR);
         fdIn = open(source_file, O_RDONLY);
+        
         return copy(fdIn, fdOut);
     }
 }
@@ -81,13 +82,9 @@ int do_not_overwrite(const char *source_file, const char *destination_file){
         printf("Il file %s già esiste!\n", destination_file);
         return -1;
     } else {
-        fdOut = open(destination_file, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
-
-        if(fdOut == -1){
-            return -1;
-        }
-        
+        fdOut = open(destination_file, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);       
         fdIn = open(source_file, O_RDONLY);
+        
         return copy(fdIn, fdOut);
     }
 }
@@ -99,7 +96,6 @@ int copy(int fdIn, int fdOut){
     buffer = (char *) calloc((BUF_LEN + 1), sizeof(char));
     
     if(fdIn != -1 && fdOut != -1){
-
         do {
             bytesRead = read(fdIn, buffer, sizeof(buffer));
 
@@ -108,6 +104,10 @@ int copy(int fdIn, int fdOut){
 
                 if (bytesWritten != bytesRead){
                     printf("Errore nella scrittura del file\n");
+                    
+                    close(fdIn);
+                    close(fdOut);
+                    
                     return -1;
                 }
             }
