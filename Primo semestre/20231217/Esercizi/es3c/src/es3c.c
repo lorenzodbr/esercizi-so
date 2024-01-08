@@ -1,39 +1,36 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+#include <sys/types.h>
+#include <sys/shm.h>
+#include <sys/stat.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <time.h>
+#include <sys/time.h>
 
-//Scrivere un programma C per calcolare la sequenza di Fibonacci, nelle seguenti varianti: 
-//2. utilizzando processi e memoria condivisa. Il programma deve prendere
-//   in input 'n' e stampare i primi 'n' numeri di Fibonacci;
+// Scrivere un programma C per calcolare la sequenza di Fibonacci, nelle seguenti varianti:
+// 3. utilizzando i thread. Il programma deve prendere in input 'n' e stampare i primi 'n' numeri di
+//    Fibonacci. Compilare il programma utilizzando i flag appropriati (ad esempio, -pthread) a seconda
+//    del vostro compilatore.
 
-int fibonacci(int);
+#define MAX_PROCESSES 10
+#define MAX_SEQUENCE 100
 
-int *support;
+typedef struct
+{
+    int sequence[MAX_SEQUENCE];
+    int length;
+} shared_data;
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[])
+{
     int n;
 
     printf("Inserisci la lunghezza della sequenza di Fibonacci da stampare: ");
     scanf("%d", &n);
 
-    support = (int *) malloc(n*sizeof(int));
-
-    if(!support) {
-        printf("Errore nell'allocazione della memoria!\n");
-        exit(1);
-    }
-    
-    for(int i = 0; i < n; i++){
-        support[i] = fibonacci(i);
-        printf("%d ", support[i]);
-    }
-
-    printf("\n");
-
     return 0;
-}
-
-int fibonacci(int i){
-    if(i <= 1) return 1;
-
-    return support[i - 1] + support[i - 2];
 }
