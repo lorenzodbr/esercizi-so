@@ -65,14 +65,13 @@ int append(const char *source_file, const char *destination_file){
 
     if(access(destination_file, F_OK) != 0){
         printf("Il file %s non esiste!\n", destination_file);
-        
         return -1;
-    } else {
-        fdOut = open(destination_file, O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR);
-        fdIn = open(source_file, O_RDONLY);
-        
-        return copy(fdIn, fdOut);
     }
+    
+    fdOut = open(destination_file, O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR);
+    fdIn = open(source_file, O_RDONLY);
+        
+    return copy(fdIn, fdOut);
 }
 
 int do_not_overwrite(const char *source_file, const char *destination_file){
@@ -81,48 +80,51 @@ int do_not_overwrite(const char *source_file, const char *destination_file){
     if(access(destination_file, F_OK) == 0){
         printf("Il file %s già esiste!\n", destination_file);
         return -1;
-    } else {
-        fdOut = open(destination_file, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);       
-        fdIn = open(source_file, O_RDONLY);
-        
-        return copy(fdIn, fdOut);
     }
+
+    fdOut = open(destination_file, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);       
+    fdIn = open(source_file, O_RDONLY);
+
+    return copy(fdIn, fdOut);
 }
 
 int copy(int fdIn, int fdOut){
     ssize_t bytesRead, bytesWritten;
 
     char *buffer;
-    buffer = (char *) calloc((BUF_LEN + 1), sizeof(char));
-    
-    if(fdIn != -1 && fdOut != -1){
-        do {
-            bytesRead = read(fdIn, buffer, sizeof(buffer));
 
-            if(bytesRead > 0){
-                bytesWritten = write(fdOut, buffer, bytesRead);
-
-                if (bytesWritten != bytesRead){
-                    printf("Errore nella scrittura del file\n");
-                    
-                    close(fdIn);
-                    close(fdOut);
-                    
-                    return -1;
-                }
-            }
-        } while (bytesRead > 0);
-
-        close(fdIn);
-        close(fdOut);
-
-        return 0;
-    } else {
+    if(fdIn == -1 || fdOut == -1){
         if(fdIn != -1) close(fdIn);
         if(fdOut != -1) close(fdOut);
-        
+            
         printf("Errore nell'apertura dei file!\n");
 
-        return -1;
-    }    
+        return -1; 
+    }
+
+    buffer = (char *) calloc((BUF_LEN + 1), sizeof(char));
+        
+    do {
+        bytesRead = read(fdIn, buffer, sizeof(buffer));
+
+        if(bytesRead > 0){
+            bytesWritten = write(fdOut, buffer, bytesRead);
+
+            if (bytesWritten != bytesRead){
+                printf("Errore nella scrittura del file\n");
+                
+                close(fdIn);
+                close(fdOut);
+                free(buffer);
+                
+                return -1;
+            }
+        }
+    } while (bytesRead > 0);
+
+    close(fdIn);
+    close(fdOut);
+    free(buffer);
+
+    return 0;
 }
