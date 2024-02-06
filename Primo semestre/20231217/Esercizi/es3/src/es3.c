@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    support = (unsigned long long *)malloc(n * sizeof(unsigned long long));
+    support = (unsigned long long *) malloc(n * sizeof(unsigned long long));
 
     if (!support)
     {
@@ -38,6 +38,7 @@ int main(int argc, char *argv[])
 
     printf("\n");
 
+    free(support);
     return 0;
 }
 

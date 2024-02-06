@@ -16,8 +16,6 @@ int main(int argc, char const *argv[])
     ssize_t bytesRead;
     char *buffer;
 
-    buffer = (char *) malloc((BUF_LEN + 1)*sizeof(char));
-
     if(!buffer){
         printf("Errore nell'allocazione della memoria");
         return -1;
@@ -27,6 +25,8 @@ int main(int argc, char const *argv[])
         printf("Utilizzo: my_cat <file1> <file2> ... <fileN>\n");
         return -1;
     }
+
+    buffer = (char *) malloc((BUF_LEN + 1)*sizeof(char));
 
     for(i = 1; i < argc; i++){
         fd = open(argv[i], O_RDONLY);
@@ -47,6 +47,8 @@ int main(int argc, char const *argv[])
             printf("Impossibile aprire: %s\n", argv[i]);
         }
     }
+
+    free(buffer);
 
     return 0;
 }

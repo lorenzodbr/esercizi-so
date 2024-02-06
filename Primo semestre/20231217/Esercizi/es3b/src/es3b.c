@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     semctl(sem_id, 0, SETVAL, 1);
 
     pid_t pids[MAX_PROCESSES];
-    shared_data *data = (shared_data *)malloc(sizeof(shared_data) * numProcesses);
+    shared_data *data = (shared_data *) malloc(sizeof(shared_data) * numProcesses);
 
     int processLength = seqLength / numProcesses;
     int remaining = seqLength % numProcesses;
@@ -105,7 +105,6 @@ int main(int argc, char *argv[])
     printf("\n");
 
     free(data);
-
     return 0;
 }
 

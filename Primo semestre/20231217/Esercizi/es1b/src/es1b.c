@@ -139,6 +139,7 @@ int main(int argc, char *argv[]){
 
     printf("Somma multiprocesso: %ld in %d clock e %d usec\n", processSum, clocksSpent, timeSpent);
 
+    free(bounds);
     return 0;
 }
 

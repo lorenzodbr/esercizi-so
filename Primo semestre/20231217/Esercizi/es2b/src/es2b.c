@@ -122,6 +122,7 @@ int main(int argc, char *argv[]){
     //stampa del fattoriale multiprocesso
     printf("Fattoriale multiprocesso: %lld in %d clock e %d usec\n", processFatt, clocksSpent, timeSpent);
 
+    free(bounds);
     return 0;
 }
 

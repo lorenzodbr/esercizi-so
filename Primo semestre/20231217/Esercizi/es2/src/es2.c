@@ -97,6 +97,7 @@ int main(int argc, char *argv[]){
 
     printf("Fattoriale multithread: %ld in %d clock e %d usec\n", threadFatt, clocksSpent, timeSpent);
 
+    free(bounds);
     pthread_exit(NULL);
     return 0;
 }

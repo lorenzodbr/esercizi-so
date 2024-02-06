@@ -26,7 +26,7 @@ int main(int argc, char* argv[]){
     char *user = NULL, *home_dir = NULL, *working_dir = NULL;
     int i;
     
-    working_dir = (char *) malloc(sizeof(char)*MAX_PATH);
+    working_dir = (char *) malloc(sizeof(char) * MAX_PATH);
     getcwd(working_dir, MAX_PATH);
 
     for(char **it = environ; (*it) != NULL && (home_dir == NULL || user == NULL); it++){
@@ -43,16 +43,19 @@ int main(int argc, char* argv[]){
 
     if(user == NULL){
         printf("Non ho trovato l'username dell'utente!\n");
+        free(working_dir);
         return -1;
     }
 
     if(home_dir == NULL){
         printf("Non ho trovato la cartella home dell'utente!\n");
+        free(working_dir);
         return -1;
     }
 
     if(working_dir == NULL){
         printf("Non ho trovato la cartella di lavoro dell'utente!\n");
+        free(working_dir);
         return -1;
     }
 
@@ -67,10 +70,13 @@ int main(int argc, char* argv[]){
             printf("Caro %s, sono dentro la tua home!\n", user);
         } else {
             printf("Impossibile creare il file nella cartella home!\n");
+
+            free(working_dir);
             return -1;
         }
     }
 
+    free(working_dir);
     return 0;
 }
 
