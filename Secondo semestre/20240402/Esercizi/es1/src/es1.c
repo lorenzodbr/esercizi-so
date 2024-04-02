@@ -83,7 +83,13 @@ int main(int argc, char *argv[]){
     }
 
     for(int i = 0; i < N; i++){
-        pthread_mutex_destroy(&mutexes[i]);
+        if(i < N - 1){
+            if(pthread_mutex_unlock(&mutexes[i]) != 0)
+                errExit("mutex_unlock");
+        }
+
+        if(pthread_mutex_destroy(&mutexes[i]) != 0)
+            errExit("mutex_destroy");
     }
 
     return 0;
