@@ -10,7 +10,7 @@
 
 int main(int argc, char *argv[])
 {
-    int pid, fdAM[2], fdMA[2], n, bR;
+    int pid, fdAM[2], fdMA[2], n, bR, bW;
     char buff[sizeof(PING) + 1];
 
     if (argc != 2)
@@ -36,8 +36,22 @@ int main(int argc, char *argv[])
 
         for (int i = 0; i < n; i++)
         {
-            write(fdAM[WRITE], PING, 4);
-            bR = read(fdMA[READ], buff, 4);
+            bW = write(fdAM[WRITE], PING, sizeof(PING));
+
+            if(bW == -1)
+            {
+                perror("write");
+                exit(EXIT_FAILURE);
+            }
+
+            bR = read(fdMA[READ], buff, sizeof(PONG));
+
+            if(bR == -1 || bR != sizeof(PONG))
+            {
+                perror("read");
+                exit(EXIT_FAILURE);
+            }
+
             printf("\t%s\n", buff);
         }
     }
@@ -48,10 +62,22 @@ int main(int argc, char *argv[])
 
         for (int i = 0; i < n; i++)
         {
-            bR = read(fdAM[READ], buff, 4);
-            buff[bR] = '\0';
+            bR = read(fdAM[READ], buff, sizeof(PING));
+
+            if(bR == -1 || bR != sizeof(PING))
+            {
+                perror("read");
+                exit(EXIT_FAILURE);
+            }
+
             printf("%d)\t%s\n", i + 1, buff);
-            write(fdMA[WRITE], PONG, 4);
+            bW = write(fdMA[WRITE], PONG, sizeof(PONG));
+
+            if(bW == -1 || bW != sizeof(PONG))
+            {
+                perror("write");
+                exit(EXIT_FAILURE);
+            }
         }
     }
 
