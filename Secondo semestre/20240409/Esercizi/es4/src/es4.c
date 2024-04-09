@@ -23,7 +23,7 @@ void parentHandler(int sig)
 int main(int argc, char *argv[])
 {
     int t;
-    
+
     for (int i = 0; i < CHILDREN; i++)
     {
         if ((pid[i] = fork()) < 0)
@@ -70,14 +70,20 @@ int main(int argc, char *argv[])
 
         int status;
 
-        if((waitpid(pid[0], &status, WUNTRACED | WNOHANG)) >= 0){
-            if(WIFSTOPPED(status)){
+        if ((waitpid(pid[0], &status, WUNTRACED | WNOHANG)) >= 0)
+        {
+            if (WIFSTOPPED(status))
+            {
                 printf("Resuming figlio1...\n");
                 kill(pid[0], SIGCONT);
-            } else {
+            }
+            else
+            {
                 printf("No need to resume figlio1...\n");
             }
-        } else {
+        }
+        else
+        {
             printf("Error while retreiving figlio1 status\n");
         }
     }

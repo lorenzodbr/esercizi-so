@@ -30,7 +30,6 @@ void parent2Handler(int sig)
 
 int main(int argc, char *argv[])
 {
-
     signal(SIGUSR1, parent1Handler);
     signal(SIGUSR2, parent2Handler);
 

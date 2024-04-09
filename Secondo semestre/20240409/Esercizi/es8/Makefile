@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -pedantic -std=c99
+CFLAGS = -Wall -pedantic
 SRC = src/es8.c
 OBJ = obj/es8.o
 BIN = bin/es8
